@@ -1,0 +1,22 @@
+.header {
+  height: 3rem;
+  background-color: antiquewhite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-links a {
+  transition: bor 0.35s ease;
+  margin: 0.5rem;
+  font-size: 1.15rem;
+  color: rgba(0, 0, 0, 0.575);
+  text-decoration: none;
+  padding: 0.15rem;
+}
+
+
+
+.header-links a:hover {
+    color: black;
+}
