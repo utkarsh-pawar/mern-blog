@@ -9,6 +9,34 @@ import { postVerification } from "./authToken.js";
 
 const router = express.Router();
 
+router.post("/checkauth", async (req, res) => {
+  try {
+    const token = req.header("auth-token");
+    if (!token) {
+      return res.json(false);
+    }
+    const verified = jwt.verify(token, process.env.JWT_KEY);
+    if (!verified) {
+      return res.json(false);
+    }
+    const user = await User.findOne({ _id: verified.userID });
+    // console.log(user);
+    if (!user) {
+      return res.json(false);
+    }
+    return res.json({
+      isUser: true,
+      userData: {
+        userID: user._id,
+        token,
+      },
+      isAdmin: user.isAdmin,
+    });
+  } catch (err) {
+    res.status(400).json(err.messeage);
+  }
+});
+
 //SIGNUP
 router.post("/signup", async (req, res) => {
   try {
@@ -41,6 +69,45 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+//Admin Login
+router.post("/adminlogin", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json("enter all required fields");
+    }
+
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(404).json("no user with entered mail found");
+    }
+
+    const checkPassword = await bcrypt.compare(password, user.password);
+
+    if (!checkPassword) {
+      return res.status(400).json("invalid credentials");
+    }
+
+    if (user.isAdmin) {
+      const token = await jwt.sign(
+        {
+          userID: user._id,
+          isAdmin: user.isAdmin,
+        },
+        process.env.JWT_KEY
+      );
+      return res.status(200).json({
+        userID: user._id,
+        token,
+      });
+    } else {
+      res.status(400).json("you are not authorized to control admin panel");
+    }
+  } catch (err) {
+    res.status(400).json(err.message);
+  }
+});
+
 //LOGIN
 router.post("/login", async (req, res) => {
   try {
@@ -68,8 +135,6 @@ router.post("/login", async (req, res) => {
       process.env.JWT_KEY
     );
     res.status(200).json({
-    
-  
       userID: user._id,
       token,
     });

@@ -1,0 +1,28 @@
+.blog {
+  width: 100%;
+  border: 1px solid black;
+  padding: 1rem;
+  margin: 0.35rem 0rem;
+  display: flex;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+
+}
+
+.blog:hover{
+  transform: scale(1.01);
+}
+
+.blog-desc {
+}
+
+.blog-desc > h1 {
+  color: #284b63;
+}
+
+.blog-desc > span{
+    color:#999999
+}
+
+.blog-img {
+}

@@ -15,20 +15,11 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
-
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 8,
+    fileSize: 1024 * 1024 * 12,
   },
-  fileFilter: fileFilter,
 });
 
 //get all blogs
@@ -41,38 +32,36 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post(
-  "/",
-  postVerification,
-  upload.single("uploadImage"),
-  async (req, res) => {
-    try {
-      const newBlog = await new Blog({
-        userID: req.user.userID,
-        title: req.body.title,
-        content: req.body.content,
-        img: req.file.path,
-      });
-
-      const savedBlog = await newBlog.save();
-      res.json(savedBlog);
-    } catch (err) {
-      res.status(400).send(err.message);
+router.post("/", postVerification, upload.single("img"), async (req, res) => {
+  try {
+    const newBlog = await new Blog({
+      userID: req.user.userID,
+      title: req.body.title,
+      content: req.body.content,
+      img: req.file.path,
+    });
+    console.log(req.file.mimetype); 
+    if(req.file.mimetype !== "image/jpeg" && req.file.mimetype !== "image/png" ){
+      return res.status(400).json("enter valid image type")
     }
+    
+    const savedBlog = await newBlog.save();
+    res.json(savedBlog);
+  } catch (err) {
+    res.status(400).send(err.message);
   }
-  );
-  
-  //get all a user posts
-  router.get("/posts",postVerification,async(req,res) =>{
-      try {
-        //   console.log(req.user.userID);
-          const posts = await Blog.find({userID:req.user.userID})
-          res.send(posts)
-          
-      } catch (err) {
-          res.send(err.message)
-      }
-  })
+});
+
+//get all a user posts
+router.get("/posts", postVerification, async (req, res) => {
+  try {
+    //   console.log(req.user.userID);
+    const posts = await Blog.find({ userID: req.user.userID });
+    res.send(posts);
+  } catch (err) {
+    res.send(err.message);
+  }
+});
 
 // get single post
 router.get("/:id", async (req, res) => {
@@ -85,7 +74,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-
 //delete post
 router.delete("/:id", postVerification, async (reqe, res) => {
   try {
@@ -95,7 +83,7 @@ router.delete("/:id", postVerification, async (reqe, res) => {
       return res.status(400).send("you are not allowed to do that");
     }
   } catch (err) {
-      res.status(400).send(err.message)
+    res.status(400).send(err.message);
   }
 });
 

@@ -31,11 +31,11 @@ export const verifyAdminToken = async (req, res, next) => {
 
 export const postVerification = async (req, res, next) => {
   try {
-    const authHeader = await req.headers.auth;
-    const token = await authHeader.split(" ")[1];
-    const user = await jwt.verify(token, process.env.JWT_KEY);
+    const token = await req.headers.auth;
+
+    const user = jwt.verify(token, process.env.JWT_KEY);
     req.user = user;
-    // console.log(req.user);
+    // console.log(req.body);
     next();
   } catch (err) {
     res.status(407).json(err);
